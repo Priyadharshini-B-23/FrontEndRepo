@@ -1,0 +1,113 @@
+
+
+import React, { useEffect, useState } from "react";
+import basestyle from "./Base.module.css";
+import registerstyle from "./ApplyJob.module.css";
+import axios from "axios";
+
+import { useNavigate, NavLink } from "react-router-dom";
+const Register = () => {
+  const navigate = useNavigate();
+
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [user, setUserDetails] = useState({
+    jobID: "",
+    jobProviderName: "",
+    preferredLocation:"",
+    jobSeekerID: "",
+  });
+
+  const changeHandler = (e) => {
+    const { name, value } = e.target;
+    setUserDetails({
+      ...user,
+      [name]: value,
+    });
+  };
+
+  const validateForm = (values) => {
+    const error = {};
+    const regex = /^[^\s+@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    if (!values.jobProviderName) {
+      error.jobProviderName = "Job Provider Name is required";
+    }
+    if (!values.preferredLocation) {
+      error.preferredLocation = "Preferred Location is required";
+    }
+    return error;
+  };
+
+  const signupHandler = (e) => {
+    e.preventDefault();
+    setFormErrors(validateForm(user));
+    setIsSubmit(true);
+    // if (!formErrors) {
+    //   setIsSubmit(true);
+    // }
+  };
+
+
+  useEffect(() => {
+    if (Object.keys(formErrors).length === 0 && isSubmit) {
+      console.log(user);
+      axios.post("https://localhost:44354/api/ApplicationDetails", user).then((res) => {
+        alert(res.data.message);
+        console.log(res.data);
+        navigate("/SDashboard", { replace: true });
+      });
+    }
+  }, [formErrors]);
+  return (
+    <>
+      <div className={registerstyle.register}>
+        <form>
+          <h1>Apply for job</h1>
+          <input
+            type="id"
+            name="jobID"
+            id="first"
+            placeholder="Enter job ID"
+            onChange={changeHandler}
+            value={user.jobID}
+          />
+          <p className={basestyle.error}>{formErrors.jobID}</p>
+          <input
+            type="text"
+            name="jobProviderName"
+            id="lname"
+            placeholder="job seeker Name"
+            onChange={changeHandler}
+            value={user.jobProviderName}
+          />
+          <p className={basestyle.error}>{formErrors.jobProviderName}</p>
+          <input
+            type="text"
+            name="preferredLocation"
+            id="email"
+            placeholder="Enter preferedlocation"
+            onChange={changeHandler}
+            value={user.preferredLocation}
+          />
+          <p className={basestyle.error}>{formErrors.preferredLocation}</p>
+          <input
+            type="id"
+            name="jobSeekerID"
+            id="phoneNumber"
+            placeholder="Enter your ID"
+            onChange={changeHandler}
+            value={user.jobSeekerID}
+          />
+          <p className={basestyle.error}>{formErrors.jobSeekerID}</p>
+        
+          <button className={basestyle.button_common} onClick={signupHandler}>
+            Apply
+          </button>
+
+        </form>
+        {/* <NavLink to="/providerlogin">Already registered? Login</NavLink> */}
+      </div>
+    </>
+  );
+};
+export default Register;
